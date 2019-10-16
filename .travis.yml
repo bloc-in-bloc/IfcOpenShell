@@ -1,7 +1,5 @@
 language: cpp
-compiler:
-  - gcc
-  - clang
+compiler: gcc
 os: linux
 dist: bionic
 sudo: required
@@ -43,26 +41,13 @@ script:
     -DJSON_INCLUDE_DIR=/usr/include/json \
     ..
   - sudo make -j2 install
-    
-  - cd ../../test
-  - /usr/bin/python2.7 tests.py
-
-  - cd input
-  
-  - /usr/local/bin/IfcConvert -yv acad2010_walls.ifc acad2010_walls.glb
-  - gltf_validator acad2010_walls.glb
-  
-  - python -c "from __future__ import print_function; from io import open; import ifcopenshell; f = ifcopenshell.open('encoding.ifc'); print(f[1][0], file=open('encoding.txt', 'w', encoding='utf-8'))" && grep "'a' 1m³ ≤ 5m³ ≥ 10m³" encoding.txt
-  
-  - |
-    (for i in *.ifc; do \
-    echo $i | tee -a log; \
-    timeout 1m /usr/local/bin/IfcConvert -yv "$i" "$i.dae" --validate >> log 2>&1; \
-    echo $i $? >> statuses; \
-    done) || true
-  - echo Failed
-  - grep -v 0$ statuses
-  - grep -v 0$ statuses | wc -l
   - echo Succeeded
-  - grep 0$ statuses
-  - grep 0$ statuses | wc -l
+  
+deploy:
+  provider: releases
+  api_key:
+    secure: EAgwbIx8F/k21Son/YIVnW0AhV74TbwDHh14s3Zkr+hvdt+LLBdgUoT0XPexQ9nAtNK0Uw2xYS9KO4GdyoheO7bJ/XhdFi5C88iyPtplZNMEsRU4ixucUtj0l10X0G9BDilf5zqUaMsNSJr7rV61R2ACBucGi0g2gpPEvDhYIH0rLf21MhUmZbdIbNQFzn46dOkNqw2VI83nBEwNCN/U2CQ21J5NPmmxTpHHmZAqQkKV6nE88cgy/6UslbHaCBdhgdoWZmdUmlJf/ryg39FxqRN8H2ynu+mPkSeAa0A9rThL88reusYz2chkNWf17mj4jhCYh/uBUrE34jJiNpbnGwLK/eHnetRelCD7WOusCthu9pwbm500yQeOKcvArH/bTVumxMQ89HvL3NQyQ2sdkH/3v3Dw2kIUN5yf+hhIbdmCWMLEREUPL/BW8bzNp0DktA0Z14hBOcjwMO4MN6Ghdd9tR0vizwI7ImpTJL3/WGQzoLq626LP19whetlXQzH0viWSa1+d8zrbzoniWNEqqoPOqmrAeNJn3j1iQ3CmCZu8t+CJqsQVNZRSitmuhIQfrw35U6XEBD/DZRPD/gmlaLsPSRRqkkHymSfPGyIPHjMgbae58EzAg5z6u3tPJ7+VgqKixiwGOOdUnYhbv0XeXq/4D0ETywMeobMWnGGqSV8=
+  file: "/usr/local/bin/IfcConvert"
+  on:
+    repo: Blocovin/IfcOpenShell
+    branch: v0.7.0
