@@ -21,6 +21,7 @@
 #define IFCGEOM_H
 
 #include <cmath>
+#include <array>
 
 static const double ALMOST_ZERO = 1.e-9;
 
@@ -37,6 +38,7 @@ inline static bool ALMOST_THE_SAME(const T& a, const T& b, double tolerance=ALMO
 #include <gp_GTrsf2d.hxx>
 #include <gp_Trsf.hxx>
 #include <gp_Trsf2d.hxx>
+#include <gp_Quaternion.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Face.hxx>
@@ -221,7 +223,9 @@ private:
 	double ifc_planeangle_unit;
 	double modelling_precision;
 	double dimensionality;
-	
+	gp_Vec offset = gp_Vec{0.0, 0.0, 0.0};
+	gp_Quaternion rotation = gp_Quaternion{};
+	gp_Trsf offset_and_rotation = gp_Trsf();
 #ifndef NO_CACHE
 	MAKE_TYPE_NAME(Cache) cache;
 #endif
@@ -262,6 +266,9 @@ public:
 		setValue(GV_DEFLECTION_TOLERANCE,     other.getValue(GV_DEFLECTION_TOLERANCE));
 		return *this;
 	}
+
+	void set_offset(const std::array<double, 3>& offset);
+	void set_rotation(const std::array<double, 4>& rotation);
 
 	bool convert_wire_to_face(const TopoDS_Wire& wire, TopoDS_Face& face);
 	bool convert_curve_to_wire(const Handle(Geom_Curve)& curve, TopoDS_Wire& wire);
