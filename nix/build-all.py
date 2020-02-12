@@ -79,7 +79,7 @@ ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 
 PROJECT_NAME="IfcOpenShell"
-PYTHON_VERSIONS=["2.7.16", "3.2.6", "3.3.6", "3.4.6", "3.5.3", "3.6.2", "3.7.3", "3.8.2"]
+PYTHON_VERSIONS=["3.8.2"]
 JSON_VERSION="v3.6.1"
 OCE_VERSION="0.18"
 # OCCT_VERSION="7.1.0"
@@ -87,7 +87,7 @@ OCE_VERSION="0.18"
 # OCCT_VERSION="7.2.0"
 # OCCT_HASH="88af392"
 OCCT_VERSION="7.3.0p3"
-BOOST_VERSION="1.59.0"
+BOOST_VERSION="1.73.0"
 #PCRE_VERSION="8.39"
 PCRE_VERSION="8.41"
 #LIBXML2_VERSION="2.9.3"
@@ -97,7 +97,7 @@ CMAKE_VERSION="3.4.3"
 SWIG_VERSION="3.0.12"
 #SWIG_VERSION="4.0.0"
 #OPENCOLLADA_VERSION="v1.6.63"
-OPENCOLLADA_VERSION="v1.6.68"
+OPENCOLLADA_VERSION="v1.6.69"
 
 
 
@@ -595,7 +595,7 @@ if "OpenCOLLADA" in targets:
             "-DPCRE_PCRE_LIBRARY={DEPS_DIR}/install/pcre-{PCRE_VERSION}/lib/libpcre.{LIBRARY_EXT}".format(**locals()),
             "-DCMAKE_INSTALL_PREFIX={DEPS_DIR}/install/OpenCOLLADA/".format(**locals())
         ],
-        download_url="https://github.com/KhronosGroup/OpenCOLLADA.git",
+        download_url="https://github.com/BlocInBloc/OpenCOLLADA.git",
         download_name="OpenCOLLADA",
         download_tool=download_tool_git,
         patch="./patches/opencollada/pr622.patch",
