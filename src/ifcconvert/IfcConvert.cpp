@@ -256,6 +256,9 @@ int main(int argc, char** argv) {
 		("center-model",
             "Centers the elements by applying the center point of all placements as an offset."
             "Can take several minutes on large models.")
+		("center-model-geometry",
+            "Centers the elements by applying the center point of all mesh vertices as an offset."
+            "Can take several minutes on large models.")
         ("model-offset", po::value<std::string>(&offset_str),
             "Applies an arbitrary offset of form 'x;y;z' to all placements.")
 		("model-rotation", po::value<std::string>(&rotation_str),
@@ -419,6 +422,7 @@ int main(int argc, char** argv) {
 	const bool use_element_hierarchy = vmap.count("use-element-hierarchy") != 0;
 	const bool no_normals = vmap.count("no-normals") != 0;
 	const bool center_model = vmap.count("center-model") != 0;
+	const bool center_model_geometry = vmap.count("center-model-geometry") != 0;
 	const bool model_offset = vmap.count("model-offset") != 0;
 	const bool model_rotation = vmap.count("model-rotation") != 0;
 	const bool site_local_placement = vmap.count("site-local-placement") != 0;
@@ -728,7 +732,7 @@ int main(int argc, char** argv) {
         if (generate_uvs) {
             Logger::Notice("Generate UVs setting ignored when writing non-tesselated output");
         }
-        if (center_model || model_offset) {
+        if (center_model || center_model_geometry || model_offset) {
             Logger::Notice("Centering/offsetting model setting ignored when writing non-tesselated output");
         }
 
@@ -776,9 +780,9 @@ int main(int argc, char** argv) {
 		Logger::Notice(msg.str());
 	}
 	
-    if (is_tesselated && (center_model || model_offset)) {
+    if (is_tesselated && (center_model || center_model_geometry || model_offset)) {
 		std::array<double, 3> &offset = settings.offset;
-        if (center_model) {
+        if (center_model || center_model_geometry) {
 			if (site_local_placement || building_local_placement) {
 				Logger::Error("Cannot use --center-model together with --{site,building}-local-placement");
 				return EXIT_FAILURE;
@@ -786,11 +790,61 @@ int main(int argc, char** argv) {
 
 			IfcGeom::Iterator<real_t> tmp_context_iterator(settings, ifc_file, filter_funcs, num_threads);
 
-            if (!quiet) Logger::Status("Computing bounds...");
-            tmp_context_iterator.compute_bounds();
-            if (!quiet) Logger::Status("Done!");
+			time_t start, end;
+			time(&start);
 
-            gp_XYZ center = (tmp_context_iterator.bounds_min() + tmp_context_iterator.bounds_max()) * 0.5;
+			if (!quiet) Logger::Status("Computing bounds...");
+
+			gp_XYZ bounds_min;
+        	gp_XYZ bounds_max;
+
+			for (int i = 1; i < 4; ++i) {
+                bounds_min.SetCoord(i, std::numeric_limits<double>::infinity());
+                bounds_max.SetCoord(i, -std::numeric_limits<double>::infinity());
+            }
+
+			if (center_model_geometry) {
+				if (!tmp_context_iterator.initialize()) {
+					/// @todo It would be nice to know and print separate error prints for a case where we found no entities
+					/// and for a case we found no entities that satisfy our filtering criteria.
+					Logger::Notice("No geometrical elements found or none succesfully converted");
+					serializer.reset();
+					IfcUtil::path::delete_file(IfcUtil::path::to_utf8(output_temp_filename));
+					write_log(!quiet);
+					return EXIT_FAILURE;
+				}
+
+				size_t num_created = 0;
+				do {
+					IfcGeom::Element<real_t>* geom_object = tmp_context_iterator.get();
+					const IfcGeom::TriangulationElement<real_t>* o = static_cast<const IfcGeom::TriangulationElement<real_t>*>(geom_object);
+					const IfcGeom::Representation::Triangulation<real_t>& mesh = o->geometry();
+					const gp_XYZ& pos = o->transformation().data().TranslationPart();
+
+					for (std::vector<real_t>::const_iterator it = mesh.verts().begin(); it != mesh.verts().end();) {
+						const real_t x = *(it++);
+						const real_t y = *(it++);
+						const real_t z = *(it++);
+						
+						bounds_min.SetX(std::min(bounds_min.X(), pos.X() + x));
+						bounds_min.SetY(std::min(bounds_min.Y(), pos.Y() + y));
+						bounds_min.SetZ(std::min(bounds_min.Z(), pos.Z() + z));
+						bounds_max.SetX(std::max(bounds_max.X(), pos.X() + x));
+						bounds_max.SetY(std::max(bounds_max.Y(), pos.Y() + y));
+						bounds_max.SetZ(std::max(bounds_max.Z(), pos.Z() + z));
+					}
+				} while (++num_created, tmp_context_iterator.next());
+			} else {
+				tmp_context_iterator.compute_bounds();
+				bounds_min = tmp_context_iterator.bounds_min();
+				bounds_max = tmp_context_iterator.bounds_max();
+			}
+
+			time(&end);
+
+			if (!quiet) Logger::Status("Done ! Computing bounds took " + format_duration(start, end));      
+
+            gp_XYZ center = (bounds_min + bounds_max) * 0.5;
             offset[0] = -center.X();
             offset[1] = -center.Y();
             offset[2] = -center.Z();
@@ -804,7 +858,7 @@ int main(int argc, char** argv) {
         }
 
         std::stringstream msg;
-        msg << "Using model offset (" << offset[0] << "," << offset[1] << "," << offset[2] << ")";
+        msg << std::setprecision (17) << "Using model offset (" << offset[0] << "," << offset[1] << "," << offset[2] << ")";
         Logger::Notice(msg.str());
     }
 
