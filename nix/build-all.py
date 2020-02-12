@@ -69,7 +69,7 @@ ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 
 PROJECT_NAME = "IfcOpenShell"
-USE_CURRENT_PYTHON_VERSION = os.getenv("USE_CURRENT_PYTHON_VERSION")
+USE_CURRENT_PYTHON_VERSION = True
 
 PYTHON_VERSIONS = ["3.6.14", "3.7.12", "3.8.12", "3.9.7", "3.10.0"]
 JSON_VERSION = "v3.6.1"

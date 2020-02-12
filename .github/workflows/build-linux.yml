@@ -1,0 +1,44 @@
+name: build-linux
+
+on:
+  push:
+    branches:
+      - CI
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Install C++ dependencies
+      run: |
+        set -ex
+        sudo apt-get update
+        echo 'binaries'
+        sudo apt-get install -y gcc g++
+        sudo apt-get install -y git autoconf bison make zip cmake
+        echo 'ifcopenshell dependencies'
+        sudo apt-get install -y libc6-dev libfreetype6-dev mesa-common-dev libffi-dev libfontconfig1-dev
+        echo 'v0.7.0 specific dependencies'
+        sudo apt-get install -y libcgal-dev
+        echo 'python dependencies'
+        sudo apt-get install -y libsqlite3-dev libbz2-dev zlib1g-dev libssl-dev liblzma-dev
+        sudo apt-get install -y libreadline-dev libncursesw5-dev libffi-dev uuid-dev
+
+    - name: Build
+      run: |
+        pwd
+        export CXXFLAGS="-O3"
+        export CFLAGS="-O3"
+        cd nix
+        sudo BUILD_CFG=Release CFLAGS="-O3" CXXFLAGS="-O3" python3 build-all.py
+        cd ..
+        sudo mv build/Linux/build/ifcopenshell/executables/IfcConvert IfcConvert
+        sudo zip IfcConvert.zip IfcConvert
+
+    - uses: actions/upload-artifact@v1
+      with:
+        name: IfcConvert
+        path: IfcConvert.zip
