@@ -16,7 +16,7 @@ jobs:
     - name: Build
       run: |
         cd nix
-        CFLAGS=-O3 CXXFLAGS=-O3 BUILD_CFG=Release python2.7 build-all.py
+        USE_OCCT=true CFLAGS=-O3 CXXFLAGS=-O3 BUILD_CFG=Release python2.7 build-all.py
         cd ..
         mv build/Darwin/x86_64/10.9/build/ifcopenshell/executables/IfcConvert IfcConvert
         zip IfcConvert.zip IfcConvert
