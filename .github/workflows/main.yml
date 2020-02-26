@@ -24,7 +24,8 @@ jobs:
         cd nix
         CFLAGS=-O3 CXXFLAGS=-O3 BUILD_CFG=Release python2.7 build-all.py
         cd ..
-        zip IfcConvert.zip build/Linux/x86_64/build/ifcopenshell/executables/IfcConvert
+        mv build/Linux/x86_64/build/ifcopenshell/executables/IfcConvert IfcConvert
+        zip IfcConvert.zip IfcConvert
     - uses: actions/upload-artifact@v1
       with:
         name: IfcConvert
