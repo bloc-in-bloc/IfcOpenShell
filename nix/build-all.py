@@ -97,7 +97,7 @@ CMAKE_VERSION="3.4.3"
 SWIG_VERSION="3.0.12"
 #SWIG_VERSION="4.0.0"
 #OPENCOLLADA_VERSION="v1.6.63"
-OPENCOLLADA_VERSION="v1.6.68"
+OPENCOLLADA_VERSION="v1.6.69"
 
 
 
@@ -595,7 +595,7 @@ if "OpenCOLLADA" in targets:
             "-DPCRE_PCRE_LIBRARY={DEPS_DIR}/install/pcre-{PCRE_VERSION}/lib/libpcre.{LIBRARY_EXT}".format(**locals()),
             "-DCMAKE_INSTALL_PREFIX={DEPS_DIR}/install/OpenCOLLADA/".format(**locals())
         ],
-        download_url="https://github.com/KhronosGroup/OpenCOLLADA.git",
+        download_url="https://github.com/BlocInBloc/OpenCOLLADA.git",
         download_name="OpenCOLLADA",
         download_tool=download_tool_git,
         patch="./patches/opencollada/pr622.patch",
