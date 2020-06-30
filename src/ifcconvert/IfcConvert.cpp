@@ -83,7 +83,7 @@ namespace po = boost::program_options;
 
 void print_version()
 {
-    cout_ << "IfcOpenShell IfcConvert " << IFCOPENSHELL_VERSION << " (OCC " << OCC_VERSION_STRING_EXT << ")\n";
+    cout_ << "IfcOpenShell IfcConvert " << IFCOPENSHELL_VERSION << "_BIB-1.0 (OCC " << OCC_VERSION_STRING_EXT << ")\n";
 }
 
 void print_usage(bool suggest_help = true)
