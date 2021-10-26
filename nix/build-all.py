@@ -747,8 +747,8 @@ if "IfcOpenShell-Python" in targets:
         if os.path.exists(cache_path):
             os.unlink(cache_path)
 
-        PYTHON_LIBRARY=run([bash, "-c", "ls    {DEPS_DIR}/install/python-{PYTHON_VERSION}{TAG}/lib/libpython*.*".format(**locals())])
-        PYTHON_INCLUDE=run([bash, "-c", "ls -d {DEPS_DIR}/install/python-{PYTHON_VERSION}{TAG}/include/python*".format(**locals())])
+        PYTHON_LIBRARY=to_pystring(run([bash, "-c", "ls    {DEPS_DIR}/install/python-{PYTHON_VERSION}{TAG}/lib/libpython*.*".format(**locals())]))
+        PYTHON_INCLUDE=to_pystring(run([bash, "-c", "ls -d {DEPS_DIR}/install/python-{PYTHON_VERSION}{TAG}/include/python*".format(**locals())]))
         PYTHON_EXECUTABLE=os.path.join(DEPS_DIR, "install", "python-{PYTHON_VERSION}{TAG}".format(**locals()), "bin", "python{PYTHON_VERSION[0]}".format(**locals()))
         os.environ["PYTHON_LIBRARY_BASENAME"]=os.path.basename(PYTHON_LIBRARY)
 
@@ -773,7 +773,7 @@ if "IfcOpenShell-Python" in targets:
         run([make, "-j%s" % (IFCOS_NUM_BUILD_PROCS,), "_ifcopenshell_wrapper"], cwd=python_dir)
         run([make, "install/local"], cwd=os.path.join(python_dir, "ifcwrap"))
 
-        module_dir = os.path.dirname(run([PYTHON_EXECUTABLE, "-c", "from __future__ import print_function; import inspect, ifcopenshell; print(inspect.getfile(ifcopenshell))"]))
+        module_dir = to_pystring(os.path.dirname(run([PYTHON_EXECUTABLE, "-c", "from __future__ import print_function; import inspect, ifcopenshell; print(inspect.getfile(ifcopenshell))"])))
 
         if get_os() != "Darwin":
             # TODO: This symbol name depends on the Python version?
